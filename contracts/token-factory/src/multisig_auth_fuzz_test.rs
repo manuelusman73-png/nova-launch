@@ -60,12 +60,18 @@ fn test_threshold_enforcement_2_of_3() {
     // First approval: proposal not yet executed
     client.approve_multisig_proposal(&signer1, &proposal_id);
     let proposal = client.get_multisig_proposal(&proposal_id).unwrap();
-    assert!(!proposal.executed, "Should not execute with 1 approval (threshold 2)");
+    assert!(
+        !proposal.executed,
+        "Should not execute with 1 approval (threshold 2)"
+    );
 
     // Second approval: should auto-execute
     client.approve_multisig_proposal(&signer2, &proposal_id);
     let proposal = client.get_multisig_proposal(&proposal_id).unwrap();
-    assert!(proposal.executed, "Should execute with 2 approvals (threshold 2)");
+    assert!(
+        proposal.executed,
+        "Should execute with 2 approvals (threshold 2)"
+    );
 }
 
 /// Test: Execution only succeeds once threshold of distinct valid signers approve (3 of 5)

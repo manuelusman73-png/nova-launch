@@ -6,10 +6,7 @@
 
 #![cfg(test)]
 
-use soroban_sdk::{
-    testutils::Address as _,
-    Address, Env, String, Vec,
-};
+use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
 
 use crate::{TokenFactory, TokenFactoryClient};
 
@@ -96,12 +93,7 @@ fn test_mint_authorization_enforced_every_call() {
     let recipient = Address::generate(&env);
 
     // Unauthorized mint should fail
-    let result = client.try_mint_tokens(
-        &token_address,
-        &unauthorized,
-        &recipient,
-        &100_000,
-    );
+    let result = client.try_mint_tokens(&token_address, &unauthorized, &recipient, &100_000);
     assert!(result.is_err(), "Unauthorized mint should fail");
 
     // Verify state unchanged
@@ -124,9 +116,7 @@ fn test_mint_randomized_ordering_consistency() {
     );
 
     // Create multiple recipients
-    let recipients: Vec<Address> = (0..5)
-        .map(|_| Address::generate(&env))
-        .collect();
+    let recipients: Vec<Address> = (0..5).map(|_| Address::generate(&env)).collect();
 
     // Mint in various orders
     let mint_amounts = vec![&env, 100_000, 250_000, 75_000, 150_000, 200_000];
@@ -313,9 +303,7 @@ fn test_mint_interleaved_with_different_recipients() {
         &1_000_000,
     );
 
-    let recipients: Vec<Address> = (0..10)
-        .map(|_| Address::generate(&env))
-        .collect();
+    let recipients: Vec<Address> = (0..10).map(|_| Address::generate(&env)).collect();
 
     let mut total_minted = 0i128;
 

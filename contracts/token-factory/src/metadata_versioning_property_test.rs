@@ -66,9 +66,7 @@ fn setup_env() -> (Env, Address, Address) {
 
 /// Strategy for generating valid IPFS URIs
 fn ipfs_uri_strategy() -> impl Strategy<Value = String> {
-    r"ipfs://Qm[a-zA-Z0-9]{44,46}"
-        .prop_map(|s| s)
-        .boxed()
+    r"ipfs://Qm[a-zA-Z0-9]{44,46}".prop_map(|s| s).boxed()
 }
 
 /// Strategy for generating sequences of metadata operations
@@ -453,7 +451,10 @@ fn test_metadata_versioning_deterministic_sequence() {
 
     let info1 = client.get_token_info(&0);
     assert_eq!(info1.metadata_version, 1);
-    assert_eq!(info1.metadata_uri, Some(String::from_str(&env, "ipfs://QmV1")));
+    assert_eq!(
+        info1.metadata_uri,
+        Some(String::from_str(&env, "ipfs://QmV1"))
+    );
 
     // Update to version 2
     let v2 = client
@@ -463,7 +464,10 @@ fn test_metadata_versioning_deterministic_sequence() {
 
     let info2 = client.get_token_info(&0);
     assert_eq!(info2.metadata_version, 2);
-    assert_eq!(info2.metadata_uri, Some(String::from_str(&env, "ipfs://QmV2")));
+    assert_eq!(
+        info2.metadata_uri,
+        Some(String::from_str(&env, "ipfs://QmV2"))
+    );
 
     // Update to version 3
     let v3 = client
@@ -473,7 +477,10 @@ fn test_metadata_versioning_deterministic_sequence() {
 
     let info3 = client.get_token_info(&0);
     assert_eq!(info3.metadata_version, 3);
-    assert_eq!(info3.metadata_uri, Some(String::from_str(&env, "ipfs://QmV3")));
+    assert_eq!(
+        info3.metadata_uri,
+        Some(String::from_str(&env, "ipfs://QmV3"))
+    );
 
     // Verify history records
     let rec1 = client.get_metadata_history(&0, &1).unwrap();
@@ -492,11 +499,8 @@ fn test_metadata_versioning_error_paths() {
     let client = TokenFactoryClient::new(&env, &contract_id);
 
     // Update before set should fail
-    let result = client.try_update_metadata(
-        &creator,
-        &0u32,
-        &String::from_str(&env, "ipfs://QmV1"),
-    );
+    let result =
+        client.try_update_metadata(&creator, &0u32, &String::from_str(&env, "ipfs://QmV1"));
     assert!(result.is_err());
 
     // Set initial metadata
@@ -505,11 +509,8 @@ fn test_metadata_versioning_error_paths() {
         .unwrap();
 
     // Second set should fail
-    let result = client.try_set_token_metadata(
-        &creator,
-        &0u32,
-        &String::from_str(&env, "ipfs://QmV2"),
-    );
+    let result =
+        client.try_set_token_metadata(&creator, &0u32, &String::from_str(&env, "ipfs://QmV2"));
     assert!(result.is_err());
 
     // Update should succeed
