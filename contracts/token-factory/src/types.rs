@@ -632,6 +632,8 @@ pub enum DataKey {
     SupplySnapshotCount(u32),
     /// Individual supply snapshot: (token_index, snapshot_index)
     SupplySnapshot(u32, u32),
+    /// Cross-contract trusted caller registry: keyed by caller Address
+    TrustedCaller(Address),
 }
 
 /// A point-in-time record of a token holder's balance.

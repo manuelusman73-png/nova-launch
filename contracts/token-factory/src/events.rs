@@ -1176,3 +1176,27 @@ pub fn emit_dynamic_quorum_configured(
         (admin.clone(), enabled, min_quorum_percent, max_quorum_percent),
     );
 }
+
+/// Emit admin transfer cancelled event
+pub fn emit_admin_cancelled(env: &Env, admin: &Address, cancelled_pending: &Address) {
+    env.events()
+        .publish((symbol_short!("adm_cxl"),), (admin.clone(), cancelled_pending.clone()));
+}
+
+/// Emit trusted caller registered event
+pub fn emit_trusted_caller_added(env: &Env, admin: &Address, caller: &Address) {
+    env.events()
+        .publish((symbol_short!("tc_add"),), (admin.clone(), caller.clone()));
+}
+
+/// Emit trusted caller revoked event
+pub fn emit_trusted_caller_removed(env: &Env, admin: &Address, caller: &Address) {
+    env.events()
+        .publish((symbol_short!("tc_rem"),), (admin.clone(), caller.clone()));
+}
+
+/// Emit authorized cross-contract call event
+pub fn emit_cross_contract_call(env: &Env, caller: &Address) {
+    env.events()
+        .publish((symbol_short!("cc_auth"),), (caller.clone(),));
+}

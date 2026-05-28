@@ -1685,3 +1685,52 @@ pub fn get_burn_schedule_id_by_token(env: &Env, token_index: u32, local_index: u
         .instance()
         .get(&crate::types::DataKey::BurnSchedulesByToken(token_index, local_index))
 }
+
+// ============================================================
+// Cross-Contract Trusted Caller Storage
+// ============================================================
+
+/// Register a trusted caller address.
+pub fn set_trusted_caller(env: &Env, caller: &Address) {
+    env.storage()
+        .instance()
+        .set(&crate::types::DataKey::TrustedCaller(caller.clone()), &true);
+}
+
+/// Remove a trusted caller address.
+pub fn remove_trusted_caller(env: &Env, caller: &Address) {
+    env.storage()
+        .instance()
+        .remove(&crate::types::DataKey::TrustedCaller(caller.clone()));
+}
+
+/// Check whether an address is a registered trusted caller.
+pub fn is_trusted_caller(env: &Env, caller: &Address) -> bool {
+    env.storage()
+        .instance()
+        .get::<_, bool>(&crate::types::DataKey::TrustedCaller(caller.clone()))
+        .unwrap_or(false)
+}
+
+// ============================================================
+// Cross-Contract Trusted Caller Storage
+// ============================================================
+
+pub fn set_trusted_caller(env: &Env, caller: &Address) {
+    env.storage()
+        .instance()
+        .set(&crate::types::DataKey::TrustedCaller(caller.clone()), &true);
+}
+
+pub fn remove_trusted_caller(env: &Env, caller: &Address) {
+    env.storage()
+        .instance()
+        .remove(&crate::types::DataKey::TrustedCaller(caller.clone()));
+}
+
+pub fn is_trusted_caller(env: &Env, caller: &Address) -> bool {
+    env.storage()
+        .instance()
+        .get::<_, bool>(&crate::types::DataKey::TrustedCaller(caller.clone()))
+        .unwrap_or(false)
+}
