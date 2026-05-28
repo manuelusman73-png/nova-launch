@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { campaignProjectionService } from "../services/campaignProjectionService";
 import {
-  validateCampaignCreate,
-  validateCampaignId,
+  validateCreateCampaignBody,
+  validateCampaignIdParam,
+  validateCampaignTokenParam,
+  validateCampaignCreatorParam,
   validateCampaignExecutionQuery,
-} from "../middleware/validation";
-import { withQueryTimeout, withQueryTimeoutRace, getQueryTimeoutMs } from "../middleware/queryTimeout";
+} from "../lib/validation/campaignSchemas";
 
 const router = Router();
 
@@ -41,7 +42,7 @@ router.get("/stats/:tokenId?", async (req, res) => {
 });
 
 /** @contract CampaignRecord[] */
-router.get("/token/:tokenId", async (req, res) => {
+router.get("/token/:tokenId", validateCampaignTokenParam, async (req, res) => {
   try {
     const { tokenId } = req.params;
     const campaigns = await campaignProjectionService.getCampaignsByToken(tokenId);
@@ -52,7 +53,7 @@ router.get("/token/:tokenId", async (req, res) => {
 });
 
 /** @contract CampaignRecord[] */
-router.get("/creator/:creator", async (req, res) => {
+router.get("/creator/:creator", validateCampaignCreatorParam, async (req, res) => {
   try {
     const { creator } = req.params;
     const campaigns = await campaignProjectionService.getCampaignsByCreator(creator);
@@ -65,33 +66,29 @@ router.get("/creator/:creator", async (req, res) => {
 /** @contract CampaignExecutionsResponse */
 router.get(
   "/:campaignId/executions",
+  validateCampaignIdParam,
   validateCampaignExecutionQuery,
-  withQueryTimeout(60_000),
   async (req, res) => {
     try {
       const campaignId = parseInt(req.params.campaignId);
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const timeoutMs = getQueryTimeoutMs(res);
+      const limit = parseInt((req.query.limit as string) ?? "50") || 50;
+      const offset = parseInt((req.query.offset as string) ?? "0") || 0;
 
-      const result = await withQueryTimeoutRace(
-        () => campaignProjectionService.getExecutionHistory(campaignId, limit, offset),
-        timeoutMs,
-        "getExecutionHistory",
+      const result = await campaignProjectionService.getExecutionHistory(
+        campaignId,
+        limit,
+        offset,
       );
 
       res.json(result);
-    } catch (error: any) {
-      if (error?.name === "QueryTimeoutError") {
-        return res.status(504).json({ error: error.message });
-      }
+    } catch (error) {
       res.status(500).json({ error: "Failed to fetch execution history" });
     }
   },
 );
 
 /** @contract CampaignRecord */
-router.get("/:campaignId", validateCampaignId, async (req, res) => {
+router.get("/:campaignId", validateCampaignIdParam, async (req, res) => {
   try {
     const campaignId = parseInt(req.params.campaignId);
     const campaign = await campaignProjectionService.getCampaignById(campaignId);
@@ -108,10 +105,10 @@ router.get("/:campaignId", validateCampaignId, async (req, res) => {
 
 /**
  * POST /api/campaigns
- * Create a new campaign. Validated by validateCampaignCreate middleware.
+ * Create a new campaign. Validated by Zod schema (strips unknown fields).
  * @contract CampaignRecord
  */
-router.post("/", validateCampaignCreate, async (req, res) => {
+router.post("/", validateCreateCampaignBody, async (req, res) => {
   try {
     const { tokenId, creator, type, targetAmount, startTime, endTime, metadata, txHash } = req.body;
 
